@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+    <title>Canvas Radar</title>
+	<body>
+		<canvas id="canvas" width="500" height="500" style="background-color: #333"></canvas>
+		
+		<script>
+            
+            var RightTarget = false;
+            var leftTarget = true;
+            var ang;
+            var beginTruth = true;
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+            var radius = canvas.height/2;
+            var sweepingRight =true;
+            var sweep = 270;
+            var distance = 75;
+            var angleLeft = 280;
+            var angleRight = 45;
+            var angle1;
+            var finish = false;
+             
+            angle1 = angle();
+            ang = angle1 * Math.PI/180;
+            console.log("first ang: " + ang);
+            if (isNaN(ang)){
+                console.log("NAN HERE");
+                ang = 1;
+            }
+			ctx.translate(radius,radius);
+            radius = radius * 0.90;
+            
+			
+			setInterval(drawRadar, 10);
+			
+			function drawRadar() {
+                
+                if (beginTruth){
+                    drawScreen(ctx,radius);
+                    drawSweep(ctx, radius);
+                    beginTruth = false;
+                }
+                
+               
+                //270 ot 360 and 0 to 90 
+                //angle = 75;
+                console.log("SweepAngle: " +sessionStorage.sweepAngle);
+                if (sessionStorage.sweepAngle<8 && sessionStorage.sweepAngle>4 && ang>4){
+                    if(sessionStorage.sweepAngle>=ang){
+                        console.log("Left Target");
+                        drawScreen(ctx,radius);
+                        drawSweep(ctx, radius);
+                        drawTarget(ctx,radius,ang);
+                        sessionStorage.target = false;
+                        
+                        
+                    }
+
+                    else{
+                        drawScreen(ctx,radius);
+                        drawSweep(ctx, radius);
+                    }
+                }
+                if (sessionStorage.sweepAngle<4 && sessionStorage.sweepAngle>=0 && ang<3){
+                    if(sessionStorage.sweepAngle>=ang){
+                        console.log("Right Target");
+                        drawScreen(ctx,radius);
+                        drawSweep(ctx, radius);
+                        drawTarget(ctx,radius,ang);
+                        sessionStorage.target = false;
+                        beginTruth=false;
+                    }
+                    if(sessionStorage.sweepAngle<ang){
+                        console.log("Right Side no target");
+                        drawScreen(ctx,radius);
+                        drawSweep(ctx, radius);
+                    }
+                 }
+                if (sessionStorage.sweepAngle<4 && sessionStorage.sweepAngle>=0 && ang>3){
+                    drawScreen(ctx,radius);
+                    drawSweep(ctx, radius);
+                    drawTarget(ctx,radius,ang);
+                }
+                if (sessionStorage.sweepAngle<8 && sessionStorage.sweepAngle>=4 && ang<3) {
+                    console.log("Target Left sweep right");
+                   
+                    drawScreen(ctx,radius);
+                    drawSweep(ctx, radius);
+                   
+                }
+                if(sessionStorage.sweepAngle<4.72 && sessionStorage.sweepAngle>4.71){
+                    console.log("finish");
+                    angle1 = angle();
+                    ang = angle1 * Math.PI/180;
+                    
+                }
+                
+                
+                console.log("ang: %d ", ang);
+               
+				
+                
+                
+			}
+			function drawScreen(ctx,radius){
+				var grad;
+				ctx.beginPath();
+                
+            
+				ctx.arc(0,0,radius, 1*Math.PI, 0*Math.PI);
+				ctx.fillStyle = "limeGreen";
+				ctx.fill();
+				grad = ctx.createRadialGradient(0,0,radius*0.95,0,0,radius*1.05);
+				grad.addColorStop(0,"#333");
+				grad.addColorStop(0.5,"green");
+				grad.addColorStop(1, "#333");
+				ctx.strokeStyle = grad;
+				ctx.lineWidth = radius*0.1;
+                ctx.stroke();
+                //half circle line
+                ctx.beginPath();
+                ctx.arc(0,0,radius*0.5,1*Math.PI,0*Math.PI);
+                ctx.strokeStyle="#333";
+                ctx.lineWidth = radius*0.01;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(0,0,radius*0.75,1*Math.PI,0*Math.PI);
+                ctx.strokeStyle="#333";
+                ctx.lineWidth = radius*0.01;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(0,0,radius*0.25,1*Math.PI,0*Math.PI);
+                ctx.strokeStyle="#333";
+                ctx.lineWidth = radius*0.01;
+                ctx.stroke();
+
+				ctx.beginPath();
+				ctx.arc(0,0, radius*0.1,0,2*Math.PI);
+				ctx.fillStyle = "black";
+				ctx.fill();
+			}
+			function drawTarget(ctx,radius,ang){
+				console.log(ang);
+                var num;
+                var i;
+				ctx.font = radius*0.14 + "px arial";
+				ctx.textBaseLine = "middle";
+                ctx.textAlign = "center";
+                
+                radiusDis = distance/100;
+                
+                    
+                    ctx.rotate(ang);
+					ctx.translate(0,-radius*radiusDis);
+					ctx.rotate(-ang);
+					ctx.fillText("x", 0, 0);
+					ctx.rotate(ang);
+					ctx.translate(0, radius*radiusDis);
+                    ctx.rotate(-ang);
+			}
+			function drawSweep(ctx, radius){
+                var sweepAngle;
+               
+               var degStart = 269;
+               var degFinish = 451;
+               var degHalf = 360;
+
+                if (sweep > degStart && sweepingRight==true){
+                    sweep+=1
+                    if (sweep >=degHalf){
+                        
+                        sweepAngle = ((sweep-degHalf)*Math.PI/(degHalf/2));
+                        sessionStorage.sweepAngle= sweepAngle;
+                    }
+                    if(sweep >degStart && sweep <degHalf){
+                       
+                        sweepAngle=(sweep*Math.PI/(degHalf/2));
+                        sessionStorage.sweepAngle= sweepAngle;
+
+                    }
+                    if (sweep==degStart){
+                        sweepingRight=true;
+                    }
+                    if(sweep ==degFinish){
+                        sweepingRight=false;
+                       
+                }
+                }
+                if (sweep>degStart && sweepingRight==false){
+                    sweep-=1;
+                    if(sweep>=degHalf){
+                        sweepAngle = ((sweep-degHalf)*Math.PI/(degHalf/2));
+                        sessionStorage.sweepAngle= sweepAngle;
+                    }
+                    if(sweep >degStart && sweep <=degHalf){
+                            sweepAngle=(sweep*Math.PI/(degHalf/2));
+                            sessionStorage.sweepAngle= sweepAngle;
+                        }
+                    if (sweep==degStart+1){
+                        
+                        sweepingRight=true;
+                    }
+                }
+                
+                drawHand(ctx,sweepAngle,radius*0.9, radius*0.02);
+				
+			}
+			function drawHand(ctx,pos,length,width){
+                
+				
+               
+                ctx.beginPath();
+                
+				ctx.lineWidth= width;
+				ctx.lineCap = "round";
+				ctx.moveTo(0,0);
+				ctx.rotate(pos);
+				ctx.lineTo(0, -length);
+				ctx.stroke();
+				ctx.rotate(-pos);
+			}
+			function angle(){
+                    angleSide();
+                    angleRight = Math.floor(Math.random()*90);
+                    angleLeft  = Math.floor(Math.random()*(360-270))+270;
+                    distance =  Math.floor(Math.random()*100);
+                    console.log("angleSide below:");
+                    console.log(angleSide());
+                    if(angleSide() == true){
+                        console.log("Left: %d", angleLeft);
+                        return angleLeft;
+                    }
+                    if (angleSide() == false){
+                        console.log("Right %d", angleRight);
+                        return angleRight;
+                    }
+                    
+                }
+                 function angleSide (){
+               
+                var x = Math.random();
+                return (x<0.5 ? true : false);
+            }
+		</script>
+	</body>
+</html>
